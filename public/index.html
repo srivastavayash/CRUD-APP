@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EmployeeDb</title>
+</head>
+
+<body>
+    <h1> Hi MongoDb Tester...👋!</h1>
+    <div>
+        <input type="text" name="user" value="Yash" required>
+        <button class="btn1">Add user</button>
+        <button class="btnMatch">Find Match</button>
+    </div>
+    <button class="btn2">List Names</button>
+    <div class="output"></div>
+    <script>
+        const input1 = document.querySelector('input[name="user"]');
+        const btn1 = document.querySelector('.btn1');
+        const btn2 = document.querySelector('.btn2');
+        const btn3 = document.querySelector('.btnMatch');
+        const output = document.querySelector('.output');
+        const endPoint = '/users';
+
+        function createOutput(data) {
+            output.innerHTML = '<div>Users</div>'
+            data.forEach(element => {
+                const main = document.createElement('div');
+
+                const myInput = document.createElement('input');
+                myInput.setAttribute('type', 'text');
+                myInput.value = element.name;
+                main.append(myInput);
+
+                const span1 = document.createElement('span');
+                span1.textContent = element._id;
+                main.append(span1);
+
+                const buttonDel = document.createElement('button');
+                buttonDel.textContent = 'Delete';
+                buttonDel.style.color = 'red';
+                buttonDel.addEventListener('click', () => {                   
+                    console.log('Delete');
+                    fetch(endPoint, {
+                        method: 'delete',
+                        body: JSON.stringify(element),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(res => res.json()).then(data => {
+                        console.log(data.status);
+                        if(data.status){
+                            main.remove();
+                        }
+                    })
+                })
+                main.append(buttonDel);
+
+                const buttonupd = document.createElement('button');
+                buttonupd.textContent = 'Update';
+                buttonupd.style.color = 'green';
+                buttonupd.addEventListener('click', () => {
+                    console.log('Update');
+                    element.name = myInput.value;
+                    console.log(element);
+                    fetch(endPoint, {
+                        method: 'put',
+                        body: JSON.stringify(element),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(res => res.json()).then(data => {
+                        console.log(data);
+                    })
+                })
+                main.append(buttonupd);
+
+                output.append(main);
+            });
+        }
+
+        btn3.addEventListener('click', () => {
+            console.log('Finder');
+            fetch('/user/' + input1.value).then(res => res.json()).then(data => {
+                if(data.length===0){
+                    output.innerHTML="<h1>No User found!!</h1>";
+                }
+                else{createOutput(data);}
+            })
+        })
+
+        btn2.addEventListener('click', () => {
+            console.log('Get');
+            fetch(endPoint).then(res => res.json()).then(data => {
+                createOutput(data);
+            })
+        })
+
+        btn1.addEventListener('click', () => {
+            console.log('Post');
+            const data = { name: input1.value };
+            console.log(data);
+            fetch(endPoint, {
+                method: 'post',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => res.json()).then(data => {
+                console.log(data);
+            })
+        })
+
+
+
+    </script>
+</body>
+
+</html>
